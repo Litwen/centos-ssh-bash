@@ -1,0 +1,15 @@
+FROM centos:8
+COPY ./CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo
+RUN mkdir /etc/yum.repos.d/repos_bak && \
+    mv /etc/yum.repos.d/CentOS-Linux* /etc/yum.repos.d/repos_bak && \
+    dnf clean all && \
+    dnf makecache
+RUN yum install -y ncurses* passwd bash-completion iptables firewalld net-tools telnet vim unzip lsof openssh-server openssh-clients
+RUN yum install -y java-1.8.0-openjdk
+ENV PW='123456'
+RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N "" && \
+    ssh-keygen -t ecdsa -f /etc/ssh/ssh_host_ecdsa_key -N "" && \
+    ssh-keygen -t ed25519 -f /etc/ssh/ssh_host_ed25519_key -N ""
+EXPOSE 22
+CMD echo "root:${PW}" | chpasswd && \
+    /usr/sbin/sshd -D
